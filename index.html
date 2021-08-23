@@ -1,5 +1,7 @@
 <html>
   <head>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/2.18.9/mqtt.min.js"></script>
    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
    <script type="text/javascript">
       google.charts.load('current', {'packages':['gauge']});
@@ -7,15 +9,16 @@
 
       function drawChart() {
 
-        var data = google.visualization.arrayToDataTable([
+        var dataGauges = google.visualization.arrayToDataTable([
           ['Label', 'Value'],
-          ['Humedad', 80],
-          ['CO2', 55],
-          ['Humedad Suelo', 68],
-          ['Luz', 68]
+          ['Temperatura', 0],
+          ['Humedad', 0],
+          ['CO2', 0],
+          ['Humedad Suelo', 0],
+          ['Luz', 0]
         ]);
 
-        var options = {
+        var optionsGauges = {
           width: 800, height: 240,
           redFrom: 90, redTo: 100,
           yellowFrom:75, yellowTo: 90,
@@ -24,28 +27,57 @@
 
         var chart = new google.visualization.Gauge(document.getElementById('chart_div'));
 
-        chart.draw(data, options);
+        chart.draw(dataGauges, optionsGauges);
+		
+		
+		
+		var client2 = mqtt.connect('ws://openproject.rfindustrial.com:9090')
 
-        setInterval(function() {
-          data.setValue(0, 1, 40 + Math.round(60 * Math.random()));
-          chart.draw(data, options);
-        }, 13000);
-        setInterval(function() {
-          data.setValue(1, 1, 40 + Math.round(60 * Math.random()));
-          chart.draw(data, options);
-        }, 5000);
-        setInterval(function() {
-          data.setValue(2, 1, 60 + Math.round(20 * Math.random()));
-          chart.draw(data, options);
-        }, 26000);
-        setInterval(function() {
-          data.setValue(3, 1, 60 + Math.round(20 * Math.random()));
-          chart.draw(data, options);
-        }, 1000);
+client2.subscribe('/vivero/#')
+//client2.publish('/vivero/connected/', 'Hello mqtt')
+
+client2.on('message', function (topic, message) {
+	
+  console.log(topic + ":" + message.toString())
+	var value = parseFloat(message.toString());
+
+  if (topic.endsWith("/TEMP"))
+  {
+	dataGauges.setValue(0, 1,  value / 100);
+	chart.draw(dataGauges, optionsGauges);
+  }	  
+
+  if (topic.endsWith("/HUM"))
+  {
+	dataGauges.setValue(1, 1,  value / 100);
+	chart.draw(dataGauges, optionsGauges);
+  }	  
+  
+  if (topic.endsWith("/CO2"))
+  {
+	dataGauges.setValue(2, 1,  value / 10);
+	chart.draw(dataGauges, optionsGauges);
+  }
+  
+  if (topic.endsWith("/MOIST"))
+  {
+	dataGauges.setValue(3, 1,  value / 10);
+	chart.draw(dataGauges, optionsGauges);
+  }	  
+  if (topic.endsWith("/LUX"))
+  {
+	dataGauges.setValue(4, 1,  value / 100);
+	chart.draw(dataGauges, optionsGauges);
+  }	  
+
+});
+
       }
     </script>
   </head>
   <body>
     <div id="chart_div" style="width: 800px; height: 240px;"></div>
   </body>
+  	<!--script src="mqtt.js"></script-->
+
 </html>
