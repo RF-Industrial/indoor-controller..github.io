@@ -13,7 +13,7 @@ client.connect({onSuccess:onConnect});
 function onConnect() {
   // Once a connection has been made, make a subscription and send a message.
   console.log("onConnect");
-  client.subscribe("World");
+  client.subscribe("/vivero/#");
   message = new Paho.MQTT.Message("Hello");
   message.destinationName = "World";
   client.send(message);
@@ -29,16 +29,21 @@ function onConnectionLost(responseObject) {
 // called when a message arrives
 function onMessageArrived(message) {
   console.log("onMessageArrived:"+message.payloadString);
+  console.log("onMessageTopic:"+message.topic);
+  
+  //data.setValue(0, 1, 40 + Math.round(60 * Math.random()));
+  //chart.draw(data, options);
+  
 }
 
 
-var client2 = mqtt.connect('ws://openproject.rfindustrial.com:9090')
-
-client2.subscribe('pepe')
-client2.publish('pepe', 'Hello mqtt')
-
-client2.on('message', function (topic, message) {
-  console.log(message.toString())
-})
-
+//var client2 = mqtt.connect('ws://openproject.rfindustrial.com:9090')
+//
+//client2.subscribe('pepe')
+//client2.publish('pepe', 'Hello mqtt')
+//
+//client2.on('message', function (topic, message) {
+//  console.log(message.toString())
+//})
+//
 //client2.end()
